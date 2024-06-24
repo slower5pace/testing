@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	// Available if you need it!
 	// "github.com/xwb1989/sqlparser"
 )
@@ -35,7 +36,15 @@ func main() {
 			return
 		}
 
-		fmt.Printf("database page size: %v", pageSize)
+		schemaBuf := make([]byte, pageSize)
+		_, err = databaseFile.Read(schemaBuf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		re, _ := regexp.Compile("CREATE TABLE")
+		tables := re.FindAll(schemaBuf, -1)
+		fmt.Printf("database page size: %v\n", pageSize)
+		fmt.Printf("number of tables: %v\n", len(tables))
 	default:
 		fmt.Println("Unknown command", command)
 		os.Exit(1)
